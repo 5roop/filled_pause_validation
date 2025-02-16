@@ -36,7 +36,7 @@ mkdir -p data/ParlaSpeech-HR
 cd data/ParlaSpeech-HR
 pwd
 curl --remote-name-all https://www.clarin.si/repository/xmlui/bitstream/handle/11356/1914{/ParlaSpeech-HR.v2.0.jsonl.gz,/ParlaSpeech-HR.v2.0.part1.tgz,/ParlaSpeech-HR.v2.0.part2.tgz,/ParlaSpeech-HR.v2.0.part3.tgz,/ParlaSpeech-HR.v2.0.part4.tgz,/ParlaSpeech-HR.v2.0.part5.tgz,/ParlaSpeech-HR.v2.0.part6.tgz,/README.txt}
-# cat ParlaSpeech-HR*part* > ParlaSpeech-HR-v2.0.tgz
+cat ParlaSpeech-HR*part* > ParlaSpeech-HR-v2.0.tgz
 tar -xzvf ParlaSpeech-HR-v2.0.tgz
 gzip -dk ParlaSpeech-HR.v2.0.jsonl.gz
 # rm *.tgz
