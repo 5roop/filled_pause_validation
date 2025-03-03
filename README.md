@@ -10,3 +10,27 @@ the validation splits were 50-50 male-female, with durations ranging from 6 to 2
 * 4_create_validation_datasets.py: From the available annotated sentences, it randomly selects 100 male sentences with automatically predicted Filled Pauses, 100 male sentences without Filled Pauses, and the same for female sentences.
 * 5_create_ean_files.py: From the final selection, the audio files are converted to 16kHz mono wav, an empty ELAN file is created, and both are placed in their own directory.
 
+## 2025-03-01T09:06:39
+
+Due to a miscomunication, an older version of the CZ files were annotated. This will not be a problem, as the sample used is still valid, it just means that additional steps will have to be taken to analyze it.
+
+## 2025-03-03T10:09:55
+
+Results of the analysis:
+
+```
+Classification report for human vs y_pred on event level:
+              precision    recall  f1-score   support
+
+           0      0.948     0.682     0.793       292
+           1      0.850     0.980     0.910       540
+
+    accuracy                          0.875       832
+   macro avg      0.899     0.831     0.852       832
+weighted avg      0.885     0.875     0.869       832
+
+Confusion matrix for human vs y_pred:
+[[199  93]
+ [ 11 529]]
+
+```
