@@ -14,13 +14,14 @@ dfcz = (
         .map_elements(lambda s: f"data/ParlaSpeech-CZ/{s}", return_dtype=pl.String)
         .alias("audio")
     )
-    .filter(
-        pl.col("audio").map_elements(
-            lambda s: Path(s).exists(), return_dtype=pl.Boolean
-        )
+    .with_columns(
+        pl.col("audio")
+        .map_elements(lambda s: Path(s).exists(), return_dtype=pl.Boolean)
+        .alias("audio_exists")
     )
 )
-
+print("CZ:", dfcz.group_by("audio_exists").agg(pl.col("audio").count()))
+dfcz = dfcz.filter(pl.col("audio_exists") == True)
 print("CZ shape:", dfcz.shape)
 dfpl = (
     pl.read_ndjson("data/ParlaSpeech-PL/ParlaSpeech-PL.v1.0.jsonl")
@@ -34,12 +35,14 @@ dfpl = (
         .map_elements(lambda s: f"data/ParlaSpeech-PL/{s}", return_dtype=pl.String)
         .alias("audio")
     )
-    .filter(
-        pl.col("audio").map_elements(
-            lambda s: Path(s).exists(), return_dtype=pl.Boolean
-        )
+    .with_columns(
+        pl.col("audio")
+        .map_elements(lambda s: Path(s).exists(), return_dtype=pl.Boolean)
+        .alias("audio_exists")
     )
 )
+print("pl:", dfpl.group_by("audio_exists").agg(pl.col("audio").count()))
+dfpl = dfpl.filter(pl.col("audio_exists") == True)
 print("pl shape:", dfpl.shape)
 for df, name in ((dfpl, "pl"), (dfcz, "cz")):
     r = []

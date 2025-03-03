@@ -13,14 +13,14 @@ ids = df["name"].to_list()
 rs = (
     pl.read_ndjson(rs_metadata_path)
     .with_columns(
-        pl.col("id").is_in(ids).alias("in_sample"), pl.lit("HR").alias("country")
+        pl.col("id").is_in(ids).alias("in_sample"), pl.lit("RS").alias("country")
     )
     .unnest("speaker_info")
 ).with_row_index()
 hr = (
     pl.read_ndjson(hr_metadata_path)
     .with_columns(
-        pl.col("id").is_in(ids).alias("in_sample"), pl.lit("RS").alias("country")
+        pl.col("id").is_in(ids).alias("in_sample"), pl.lit("HR").alias("country")
     )
     .unnest("speaker_info")
 ).with_row_index()
