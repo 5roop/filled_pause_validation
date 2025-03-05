@@ -1,0 +1,39 @@
+from pathlib import Path
+import polars as pl
+
+available_anns = sorted(list(Path("anns").glob("**/*.ann.eaf")))
+
+rule produce_files_df:
+    conda: "transformers"
+    input: available_anns
+    output:
+        # To track what we have:
+        files_df="files.jsonl",
+        # To track what audios we need to infer on:
+        audios="audios.jsonl",
+    script:
+        "scripts/produce_files.py"
+
+
+rule infer:
+    conda: "transformers"
+    input: rules.produce_files_df.output.audios
+    output: "inferred.jsonl"
+    script:
+        "scripts/infer.py"
+
+rule extract_data_from_files:
+    conda: "transformers"
+    input: rules.produce_files_df.output.files_df
+    output: "annotations.jsonl"
+    script: "scripts/read_anns.py"
+
+rule join_annotations_and_predictions:
+    default_target: True
+    conda: "transformers"
+    input:
+        ann=rules.extract_data_from_files.output[0],
+        inferred = rules.infer.output[0]
+    output: "master.jsonl"
+    script:
+        "scripts/join_annotations_and_predictions.py"
