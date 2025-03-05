@@ -73,14 +73,29 @@ except FileNotFoundError:
     from pathlib import Path
     import polars as pl
 
-    device = torch.device("cuda:6")
+    device = torch.device("cuda:2")
     model_name = "classla/wav2vecbert2-filledPause"
     feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
     model = Wav2Vec2BertForAudioFrameClassification.from_pretrained(model_name).to(
         device
     )
 
-    def frames_to_intervals(frames: list[int]) -> list[tuple[float]]:
+    def frames_to_intervals(
+        frames: list[int], drop_short=True, drop_initial=True, short_cutoff_s=0.08
+    ) -> list[tuple[float]]:
+        """Transforms a list of ones or zeros, corresponding to annotations on frame
+        levels, to a list of intervals ([start second, end second]).
+
+        Allows for additional filtering on duration (false positives are often short)
+        and start times (false positives starting at 0.0 are often an artifact of
+        poor segmentation).
+
+        :param list[int] frames: Input frame labels
+        :param bool drop_short: Drop everything shorter than short_cutoff_s, defaults to True
+        :param bool drop_initial: Drop predictions starting at 0.0, defaults to True
+        :param float short_cutoff_s: Duration in seconds of shortest allowable prediction, defaults to 0.08
+        :return list[tuple[float]]: List of intervals [start_s, end_s]
+        """
         from itertools import pairwise
         import pandas as pd
 
@@ -103,6 +118,10 @@ except FileNotFoundError:
                         round(ndf.loc[ei - 1, "time_s"], 3),
                     )
                 )
+        if drop_short and (len(results) > 0):
+            results = [i for i in results if (i[1] - i[0] >= short_cutoff_s)]
+        if drop_initial and (len(results) > 0):
+            results = [i for i in results if i[0] != 0.0]
         return results
 
     def evaluator(chunks):
@@ -115,7 +134,10 @@ except FileNotFoundError:
             ).to(device)
             logits = model(**inputs).logits
         y_pred = np.array(logits.cpu()).argmax(axis=-1)
-        intervals = [frames_to_intervals(i) for i in y_pred.tolist()]
+        intervals = [
+            frames_to_intervals(i, drop_short=False, drop_initial=False)
+            for i in y_pred.tolist()
+        ]
         # print(intervals)
         return {"y_pred": intervals}
 
@@ -173,7 +195,7 @@ for row in df.iter_rows(named=True):
 pl.Config.set_tbl_cols(-1)
 pl.Config.set_tbl_rows(-1)
 pl.Config.set_tbl_width_chars(600)
-pl.Config.set_fmt_str_lengths(100)
+pl.Config.set_fmt_str_lengths(50)
 print(df.select(["file", "y_true", "y_pred"]))
 print(
     "Classification report for Nela vs y_pred on event level: ",
@@ -182,6 +204,33 @@ print(
 )
 print("Confusion matrix for Nela vs y_pred:")
 print(confusion_matrix(y_pred=y_pred_events, y_true=y_true_events))
+
+
+Path("to_reannotate.txt").write_text(
+    "\n".join(
+        df.filter(pl.col("y_pred").ne([]) | pl.col("y_true").ne([]))["eaf_path"]
+        .str.split("/")
+        .list.get(2)
+        .to_list()
+    )
+)
+master_df = (
+    pl.read_ndjson("data/ParlaSpeech-CZ/ParlaSpeech-CZ.v1.0.jsonl")
+    .with_columns(
+        file=pl.col("audio").str.split("/").list.last().str.replace(".flac", "")
+    )
+    .filter(pl.col("file").is_in(df["file"]))
+    .unnest("speaker_info")
+    .select(["file", "Speaker_gender"])
+)
+
+sanity_check = df.with_columns(pl.col("y_pred").eq([]).alias("is_empty")).join(
+    master_df, on="file"
+)
+
+print("Sanity check: composition of sample:")
+print(sanity_check.group_by(["Speaker_gender", "is_empty"]).len())
+
 
 Path("7_inspection_tgs/cz").mkdir(exist_ok=True, parents=True)
 from pydub import AudioSegment

@@ -5,6 +5,7 @@ data/
 5_final_empty_files
 6_annotation_results
 7_inspection_tgs
+annotation_eval/.snakemake
 
 
 
