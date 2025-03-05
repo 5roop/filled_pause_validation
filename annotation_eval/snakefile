@@ -37,3 +37,6 @@ rule join_annotations_and_predictions:
     output: "master.jsonl"
     script:
         "scripts/join_annotations_and_predictions.py"
+rule report:
+    input: rules.join_annotations_and_predictions.output[0]
+    output:
