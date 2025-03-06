@@ -7,11 +7,23 @@ import torch
 from datasets import Audio, Dataset
 from transformers import AutoFeatureExtractor, Wav2Vec2BertForAudioFrameClassification
 
-try:
-    inpath = snakemake.input[0]
-    df = pl.read_ndjson(inpath)
-except NameError:
-    df = pl.read_ndjson("audios.jsonl").sample(20)
+file = snakemake.wildcards["file"]
+
+
+def find_audio(f: str):
+    candidates = list(Path("../data/").glob(f"**/{f}.flac")) + list(
+        Path("../data/").glob(f"**/{f}.mp3")
+    )
+    if len(candidates) == 1:
+        return str(candidates[0])
+    else:
+        print("Could not find file")
+        raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
+
+
+audio = find_audio(file)
+
+df = pl.DataFrame({"file": [file], "audio_path": [audio]})
 
 device = torch.device("cuda")
 model_name = "classla/wav2vecbert2-filledPause"
@@ -102,7 +114,7 @@ ds = Dataset.from_pandas(df.to_pandas()).cast_column(
 ds = ds.map(
     evaluator,
     batched=True,
-    batch_size=20,
+    batch_size=1,
 )
 df = ds.to_polars().select(["file", pl.selectors.starts_with("y_pred")])
 try:

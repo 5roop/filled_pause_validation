@@ -31,15 +31,15 @@ def find_audio(f: str):
         raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
 
 
-print("Finding audios...")
-to_find = df["file"].unique()
+# print("Finding audios...")
+# to_find = df["file"].unique()
 
-from concurrent.futures import ProcessPoolExecutor
-
-with ProcessPoolExecutor(max_workers=1000) as executor:
-    audios = executor.map(find_audio, to_find)
-print("Audios found")
-audio_mapper = pl.DataFrame({"file": to_find, "audio_path": audios})
+# from concurrent.futures import ProcessPoolExecutor
+#
+# with ProcessPoolExecutor(max_workers=1000) as executor:
+# audios = executor.map(find_audio, to_find)
+# print("Audios found")
+# audio_mapper = pl.DataFrame({"file": to_find, "audio_path": audios})
 
 df.sort("file").write_ndjson(snakemake.output.files_df)
-audio_mapper.sort("file").write_ndjson(snakemake.output.audios)
+# audio_mapper.sort("file").write_ndjson(snakemake.output.audios)

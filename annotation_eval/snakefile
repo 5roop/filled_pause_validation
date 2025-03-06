@@ -2,25 +2,32 @@ from pathlib import Path
 import polars as pl
 
 available_anns = sorted(list(Path("anns").glob("**/*.ann.eaf")))
+expected_inferred = map(
+    lambda p: p.with_suffix("").with_suffix(".jsonl").name,
+    available_anns
+)
+expected_inferred = sorted(list(set(list(expected_inferred))))
+
 
 rule produce_files_df:
     conda: "transformers"
     input: available_anns
     output:
-        # To track what we have:
         files_df="files.jsonl",
-        # To track what audios we need to infer on:
-        audios="audios.jsonl",
     script:
         "scripts/produce_files.py"
+rule infer_on_one:
+    output: "y_pred/{file}.jsonl"
+    conda:"transformers"
+    resources:
+        gpu_limit = 1
+    script: "scripts/infer_on_one.py"
 
-
-rule infer:
-    conda: "transformers"
-    input: rules.produce_files_df.output.audios
+rule gather_inferred:
+    input: expand("y_pred/{file}", file=expected_inferred)
     output: "inferred.jsonl"
-    script:
-        "scripts/infer.py"
+    shell:
+        "cat {input} > {output[0]}"
 
 rule extract_data_from_files:
     conda: "transformers"
@@ -29,14 +36,15 @@ rule extract_data_from_files:
     script: "scripts/read_anns.py"
 
 rule join_annotations_and_predictions:
-    default_target: True
     conda: "transformers"
     input:
         ann=rules.extract_data_from_files.output[0],
-        inferred = rules.infer.output[0]
+        inferred = rules.gather_inferred.output[0]
     output: "master.jsonl"
     script:
         "scripts/join_annotations_and_predictions.py"
 rule report:
+    default_target: True
+    conda: "transformers"
     input: rules.join_annotations_and_predictions.output[0]
-    output:
+    script: "scripts/report.py"
