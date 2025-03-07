@@ -177,12 +177,13 @@ biggest_differences = (
         .abs()
         .alias("abs_diff")
     )
-    .sort("abs_diff", descending=True)
-    .select("lang file who abs_diff".split())
-    # .unique(subset=["file"], keep="first")
+    .sort("abs_diff file".split(), descending=True)
+    .select("lang file abs_diff".split())
+    .unique(subset=["file"], maintain_order=True, keep="first")
+    .filter(pl.col("abs_diff").ge(1))
 )
 
-print(biggest_differences.head(30))
+print(biggest_differences)
 
 from datetime import datetime
 
@@ -221,6 +222,32 @@ Order by biggest difference. The TextGrids and audio are available on our
 server at `/cache/peterr/filled_pause_validation/annotation_eval/TG`
 
 {{ biggest_differences }}
+
+
+## Manual analysis:
+
+FP: false positive
+
+FN: false negative
+
+All comments based on auscultative examination
+
+| lang   | file                           |   comment  |
+|:-------|:-------------------------------|:-----------|
+| CZ     | 2022101815281542_470.52-480.92 |          One FP by model |
+| CZ     | 2022061510181032_206.52-222.18 |          One FP by model, 2 FN by annotator|
+| CZ     | 2022012613181332_256.23-271.19 |          3 FN by annotator |
+| CZ     | 2020030415581612_281.38-288.52 |          3 FN by annotator|
+| PL     | 3sjBHcXY-w8_15353.68-15370.68  |          3:1 phenomenon |
+| CZ     | 2022092715181532_217.04-231.94 |          twice 2:1 phenomenon |
+| CZ     | 2022061415281542_188.70-195.46 |          2 FN by annotator |
+| CZ     | 2022050420082022_565.36-579.73 |          One prominent /aam/ perhaps lexical? One probably FN by annotator|
+| CZ     | 2022032918581912_236.43-249.13 |          One probable FP by model, one probable FN by annotator |
+| CZ     | 2022031113281342_335.85-348.25 |          Probable FN by annotator, one short FN by annotator|
+| CZ     | 2020050518181832_677.79-684.86 |          2 consecutive FN by model at the beginning . Raw has them as one filled pause, but we cut it afterwards in post processing|
+| CZ     | 2020013112281242_124.92-134.81 |          2 FN by model|
+| CZ     | 2014032610281042_361.00-377.77 |          1 FN by model at 0.0 that we cut in post processing. 1 FN by model, detected by 1 annotator only |
+| CZ     | 2014021119081922_520.16-535.18 |          1 debatable FP (/bih ə/) by model, one FN by one annotator|
 """
 
 2 + 2
@@ -231,9 +258,9 @@ Path(snakemake.output[0]).write_text(
             file_count=file_count.to_pandas().to_markdown(index=False),
             iaa=iaa.to_pandas().to_markdown(index=False),
             metrics=metrics.to_pandas().to_markdown(index=False),
-            biggest_differences=biggest_differences.head(30)
-            .to_pandas()
-            .to_markdown(index=False),
+            biggest_differences=biggest_differences.to_pandas().to_markdown(
+                index=False
+            ),
         )
     )
 )
