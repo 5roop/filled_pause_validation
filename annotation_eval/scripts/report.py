@@ -163,10 +163,26 @@ metrics = (
     .select("lang who how recall precision num_files".split())
     .sort("lang who how".split())
     .filter(pl.col("how").is_in(["raw", "drop_short_and_initial"]))
+    .with_columns((2 / (1 / pl.col("recall") + 1 / pl.col("precision"))).alias("F1"))
 )
-pl.Config.set_tbl_rows(300)
+pl.Config.set_tbl_rows(100)
 print(metrics)
 
+biggest_differences = (
+    df.with_columns(
+        (
+            pl.col("y_true").list.len().cast(pl.Int64)
+            - pl.col("y_pred_drop_short_and_initial").list.len().cast(pl.Int64)
+        )
+        .abs()
+        .alias("abs_diff")
+    )
+    .sort("abs_diff", descending=True)
+    .select("lang file who abs_diff".split())
+    # .unique(subset=["file"], keep="first")
+)
+
+print(biggest_differences.head(30))
 
 from datetime import datetime
 
@@ -182,9 +198,15 @@ Report compiled: {{ when }}
 
 ## Composition of available files:
 
+Simple count of available files per language and per annotator:
+
 {{ file_count }}
 
 ## Inter-annotator agreement
+
+Displayed for all setups where it makes sense (at least two annotators.)
+
+In case of three or more annotators, display pair-wise comparisons.
 
 {{ iaa }}
 
@@ -192,9 +214,16 @@ Report compiled: {{ when }}
 
 {{ metrics }}
 
+## Inspection of the biggest discrepancies
+
+Methodology: Count _number_ of positive events in predictions and annotations.
+Order by biggest difference. The TextGrids and audio are available on our
+server at `/cache/peterr/filled_pause_validation/annotation_eval/TG`
+
+{{ biggest_differences }}
 """
 
-
+2 + 2
 Path(snakemake.output[0]).write_text(
     Template(template).render(
         dict(
@@ -202,7 +231,9 @@ Path(snakemake.output[0]).write_text(
             file_count=file_count.to_pandas().to_markdown(index=False),
             iaa=iaa.to_pandas().to_markdown(index=False),
             metrics=metrics.to_pandas().to_markdown(index=False),
+            biggest_differences=biggest_differences.head(30)
+            .to_pandas()
+            .to_markdown(index=False),
         )
     )
 )
-2 + 2

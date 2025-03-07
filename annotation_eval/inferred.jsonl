@@ -172,7 +172,7 @@
 {"file":"2020042210281042_509.53-520.91","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
 {"file":"2020042211181132_174.81-186.28","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
 {"file":"2020042214481502_191.36-207.42","y_pred_raw":[[3.08,3.16]],"y_pred_drop_short":[[3.08,3.16]],"y_pred_drop_initial":[[3.08,3.16]],"y_pred_drop_short_and_initial":[[3.08,3.16]]}
-{"file":"2020042217281742_493.69-502.23","y_pred_raw":[[2.66,2.94],[5.28,5.62]],"y_pred_drop_short":[[2.66,2.94],[5.28,5.62]],"y_pred_drop_initial":[[2.66,2.94],[5.28,5.62]],"y_pred_drop_short_and_initial":[[2.66,2.94],[5.28,5.62]]}
+{"file":"2020042217281742_493.69-502.23","y_pred_raw":[[2.66,2.94],[5.3,5.62]],"y_pred_drop_short":[[2.66,2.94],[5.3,5.62]],"y_pred_drop_initial":[[2.66,2.94],[5.3,5.62]],"y_pred_drop_short_and_initial":[[2.66,2.94],[5.3,5.62]]}
 {"file":"2020042810281042_357.94-374.05","y_pred_raw":[[1.62,2.0]],"y_pred_drop_short":[[1.62,2.0]],"y_pred_drop_initial":[[1.62,2.0]],"y_pred_drop_short_and_initial":[[1.62,2.0]]}
 {"file":"2020042815381552_639.32-650.38","y_pred_raw":[[3.3,3.66],[4.84,5.12],[6.84,7.16]],"y_pred_drop_short":[[3.3,3.66],[4.84,5.12],[6.84,7.16]],"y_pred_drop_initial":[[3.3,3.66],[4.84,5.12],[6.84,7.16]],"y_pred_drop_short_and_initial":[[3.3,3.66],[4.84,5.12],[6.84,7.16]]}
 {"file":"2020042819081922_295.29-306.82","y_pred_raw":[[2.56,3.86],[5.38,5.82],[10.26,10.74]],"y_pred_drop_short":[[2.56,3.86],[5.38,5.82],[10.26,10.74]],"y_pred_drop_initial":[[2.56,3.86],[5.38,5.82],[10.26,10.74]],"y_pred_drop_short_and_initial":[[2.56,3.86],[5.38,5.82],[10.26,10.74]]}
@@ -400,3 +400,12 @@
 {"file":"2022112915381552_368.70-377.22","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
 {"file":"2022121609080922_518.38-528.44","y_pred_raw":[[5.12,5.3]],"y_pred_drop_short":[[5.12,5.3]],"y_pred_drop_initial":[[5.12,5.3]],"y_pred_drop_short_and_initial":[[5.12,5.3]]}
 {"file":"2022121612381252_315.95-327.33","y_pred_raw":[[6.94,7.38]],"y_pred_drop_short":[[6.94,7.38]],"y_pred_drop_initial":[[6.94,7.38]],"y_pred_drop_short_and_initial":[[6.94,7.38]]}
+{"file":"2myEluqDvvg_31331.74-31348.5","y_pred_raw":[[6.02,6.14],[7.74,8.18],[12.56,13.2]],"y_pred_drop_short":[[6.02,6.14],[7.74,8.18],[12.56,13.2]],"y_pred_drop_initial":[[6.02,6.14],[7.74,8.18],[12.56,13.2]],"y_pred_drop_short_and_initial":[[6.02,6.14],[7.74,8.18],[12.56,13.2]]}
+{"file":"2tqDy2Moigc_11416.66-11423.76","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
+{"file":"2tqDy2Moigc_25892.98-25901.46","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
+{"file":"2tqDy2Moigc_34098.08-34117.9","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
+{"file":"3LToHTo2xYo_35347.46-35354.08","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
+{"file":"3dXrqJOPW-c_1194.98-1202.92","y_pred_raw":[[2.04,2.28]],"y_pred_drop_short":[[2.04,2.28]],"y_pred_drop_initial":[[2.04,2.28]],"y_pred_drop_short_and_initial":[[2.04,2.28]]}
+{"file":"3dXrqJOPW-c_41689.68-41696.96","y_pred_raw":[],"y_pred_drop_short":[],"y_pred_drop_initial":[],"y_pred_drop_short_and_initial":[]}
+{"file":"3sjBHcXY-w8_15353.68-15370.68","y_pred_raw":[[1.0,1.92],[14.2,14.5]],"y_pred_drop_short":[[1.0,1.92],[14.2,14.5]],"y_pred_drop_initial":[[1.0,1.92],[14.2,14.5]],"y_pred_drop_short_and_initial":[[1.0,1.92],[14.2,14.5]]}
+{"file":"3sjBHcXY-w8_4108.98-4119.38","y_pred_raw":[[7.56,7.8]],"y_pred_drop_short":[[7.56,7.8]],"y_pred_drop_initial":[[7.56,7.8]],"y_pred_drop_short_and_initial":[[7.56,7.8]]}

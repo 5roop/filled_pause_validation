@@ -25,7 +25,7 @@ audio = find_audio(file)
 
 df = pl.DataFrame({"file": [file], "audio_path": [audio]})
 
-device = torch.device("cuda")
+device = torch.device("cpu")
 model_name = "classla/wav2vecbert2-filledPause"
 feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = Wav2Vec2BertForAudioFrameClassification.from_pretrained(model_name).to(device)

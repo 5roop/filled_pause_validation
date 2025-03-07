@@ -37,7 +37,7 @@ audio_len = len(audio) / 1e3
 # else:
 # audio_len = len(AudioSegment.from_file(audio_path))
 tg = textgrid.TextGrid()
-y_pred_tier = textgrid.IntervalTier(name="y_pred", minTime=0, maxTime=audio_len)
+y_pred_tier = textgrid.IntervalTier(name="y pred", minTime=0, maxTime=audio_len)
 y_pred = subset.head(1)["y_pred_drop_short_and_initial"][0]
 for i in y_pred:
     y_pred_tier.addInterval(textgrid.Interval(i[0], i[1], "eee"))
