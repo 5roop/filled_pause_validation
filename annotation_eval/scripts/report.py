@@ -17,7 +17,7 @@ def is_overlapping(this, other):
 
 
 def intervals_to_events(y_trues, y_preds):
-    from sklearn.metrics import recall_score, precision_score, accuracy_score
+    from sklearn.metrics import accuracy_score, precision_score, recall_score
 
     y_pred_events, y_true_events = [], []
     FPs = []
@@ -62,9 +62,12 @@ def intervals_to_events(y_trues, y_preds):
     }
 
 
+file_count = df.group_by(["who", "lang"]).agg(
+    pl.col("file").count().alias("file count")
+)
 print(
     "File count:",
-    df.group_by(["who", "lang"]).agg(pl.col("file").count().alias("file count")),
+    file_count,
 )
 
 
@@ -147,8 +150,7 @@ molten = df.unpivot(
     on=how_cols, index=other_cols, variable_name="how", value_name="y_pred"
 ).with_columns(pl.col("how").str.replace(r"y_pred_", ""))
 
-pl.Config.set_tbl_rows(300)
-print(
+metrics = (
     molten.group_by(["lang", "who", "how"])
     .agg(
         pl.map_groups(
@@ -160,4 +162,47 @@ print(
     .unnest("stats")
     .select("lang who how recall precision num_files".split())
     .sort("lang who how".split())
+    .filter(pl.col("how").is_in(["raw", "drop_short_and_initial"]))
 )
+pl.Config.set_tbl_rows(300)
+print(metrics)
+
+
+from datetime import datetime
+
+import pytz
+from jinja2 import Template
+from pathlib import Path
+
+when = datetime.now(tz=pytz.timezone("Europe/Ljubljana")).isoformat()
+template = """
+# Automated evaluation report
+
+Report compiled: {{ when }}
+
+## Composition of available files:
+
+{{ file_count }}
+
+## Inter-annotator agreement
+
+{{ iaa }}
+
+## Validation metrics:
+
+{{ metrics }}
+
+"""
+
+
+Path(snakemake.output[0]).write_text(
+    Template(template).render(
+        dict(
+            when=when,
+            file_count=file_count.to_pandas().to_markdown(index=False),
+            iaa=iaa.to_pandas().to_markdown(index=False),
+            metrics=metrics.to_pandas().to_markdown(index=False),
+        )
+    )
+)
+2 + 2

@@ -43,8 +43,26 @@ rule join_annotations_and_predictions:
     output: "master.jsonl"
     script:
         "scripts/join_annotations_and_predictions.py"
+
+rule prep_single_textgrids:
+    conda: "transformers"
+    input:
+        master = rules.join_annotations_and_predictions.output[0]
+    output:
+        tg = "TG/{lang}/{file}/{file}.TextGrid",
+        wav = "TG/{lang}/{file}/{file}.wav",
+    script: "scripts/prep_single_textgrids.py"
+
+rule gather_textgrids:
+    input: sorted(list(set([f"""TG/{i.parent.parent.name}/{i.with_suffix("").with_suffix("").name}/{i.with_suffix("").with_suffix(".TextGrid").name}""" for i in available_anns])))
+    output: "tg_prepared"
+    shell: "touch {output}"
+
+
 rule report:
     default_target: True
     conda: "transformers"
-    input: rules.join_annotations_and_predictions.output[0]
+    input: rules.join_annotations_and_predictions.output[0], rules.gather_textgrids.output[0]
+    output: "report.md"
     script: "scripts/report.py"
+
