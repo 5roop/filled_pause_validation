@@ -181,12 +181,12 @@ molten = df.unpivot(
     on=how_cols, index=other_cols, variable_name="how", value_name="y_pred"
 ).with_columns(
     pl.col("how").str.replace(r"y_pred_", ""),
-    pl.struct(["y_true", "y_pred"])
-    .map_elements(
-        lambda row: intervals_to_events([row["y_true"]], [row["y_pred"]]),
-        return_dtype=pl.Struct,
-    )
-    .alias("rowstats"),
+    # pl.struct(["y_true", "y_pred"])
+    # .map_elements(
+    #     lambda row: intervals_to_events([row["y_true"]], [row["y_pred"]]),
+    #     return_dtype=pl.Struct,
+    # )
+    # .alias("rowstats"),
 )
 
 metrics = (
@@ -201,7 +201,11 @@ metrics = (
     .unnest("stats")
     .with_columns((2 / (1 / pl.col("recall") + 1 / pl.col("precision"))).alias("F1"))
     .select("lang who how recall precision F1 num_files".split())
-    .filter(pl.col("how").is_in(["raw", "drop_short", "drop_short_and_initial"]))
+    .filter(
+        pl.col("how").is_in(
+            ["raw", "drop_short", "drop_short_and_initial", "drop_initial"]
+        )
+    )
     .sort("lang who how".split())
 )
 pl.Config.set_tbl_rows(100)
@@ -300,7 +304,7 @@ Path(snakemake.output[0]).write_text(
             iaa=iaa.sort("observed_agreement", descending=True)
             .to_pandas()
             .to_markdown(index=False),
-            metrics=metrics.sort("F1", descending=True)
+            metrics=metrics.sort("lang who F1".split())
             .to_pandas()
             .to_markdown(index=False),
             biggest_differences=biggest_differences.to_pandas().to_markdown(
