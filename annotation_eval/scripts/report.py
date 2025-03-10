@@ -35,24 +35,52 @@ def intervals_to_events(y_trues, y_preds):
             instance_shifted.append([event[0] + 1e-6, event[1] + 1e-6])
         y_preds_shifted.append(instance_shifted)
     y_preds = y_preds_shifted
+    inhibited_events = []
     for y_pred, y_true in zip(y_preds, y_trues):
         if (y_pred == []) and (y_true == []):
             y_pred_events.append(0)
             y_true_events.append(0)
-        for event in y_pred + y_true:
-            if any([is_overlapping(event, x) for x in y_pred + y_true if x != event]):
+            continue
+        for event in y_true:
+            overlapping = [
+                is_overlapping(event, x) for x in y_pred if x not in inhibited_events
+            ]
+            if any(overlapping):
                 y_pred_events.append(1)
                 y_true_events.append(1)
-                TPs.append(event)
+                inhibited_events.extend([x for x in y_pred if is_overlapping(event, x)])
             else:
-                if event in y_pred:
-                    y_pred_events.append(1)
-                    y_true_events.append(0)
-                    FPs.append(event)
-                else:
-                    y_true_events.append(1)
-                    y_pred_events.append(0)
-                    FNs.append(event)
+                y_pred_events.append(0)
+                y_true_events.append(1)
+        for event in y_pred:
+            if event not in inhibited_events:
+                y_pred_events.append(1)
+                y_true_events.append(0)
+    # for y_pred, y_true in zip(y_preds, y_trues):
+    #     if (y_pred == []) and (y_true == []):
+    #         y_pred_events.append(0)
+    #         y_true_events.append(0)
+    #     for event in y_pred + y_true:
+    #         overlapping = [
+    #             is_overlapping(event, x)
+    #             for x in y_pred + y_true
+    #             if ((x != event) and (x not in inhibited_events))
+    #         ]
+    #         if any(overlapping):
+    #             y_pred_events.append(1)
+    #             y_true_events.append(1)
+    #             TPs.append(event)
+    #             inhibited_events.append(event)
+    #             inhibited_events.extend(overlapping)
+    #         else:
+    #             if event in y_pred:
+    #                 y_pred_events.append(1)
+    #                 y_true_events.append(0)
+    #                 FPs.append(event)
+    #             else:
+    #                 y_true_events.append(1)
+    #                 y_pred_events.append(0)
+    #                 FNs.append(event)
     return {
         "y_pred": y_pred_events,
         "y_true": y_true_events,
@@ -62,6 +90,9 @@ def intervals_to_events(y_trues, y_preds):
     }
 
 
+y_true = [[[1, 2], [2.2, 2.6], [3, 4]]]
+y_pred = [[[0, 5]]]
+intervals_to_events(y_true, y_pred)
 file_count = df.group_by(["who", "lang"]).agg(
     pl.col("file").count().alias("file count")
 )
@@ -148,7 +179,15 @@ other_cols = df.select(~pl.selectors.starts_with("y_pred")).columns
 
 molten = df.unpivot(
     on=how_cols, index=other_cols, variable_name="how", value_name="y_pred"
-).with_columns(pl.col("how").str.replace(r"y_pred_", ""))
+).with_columns(
+    pl.col("how").str.replace(r"y_pred_", ""),
+    pl.struct(["y_true", "y_pred"])
+    .map_elements(
+        lambda row: intervals_to_events([row["y_true"]], [row["y_pred"]]),
+        return_dtype=pl.Struct,
+    )
+    .alias("rowstats"),
+)
 
 metrics = (
     molten.group_by(["lang", "who", "how"])
@@ -160,10 +199,10 @@ metrics = (
         pl.col("ann").n_unique().alias("num_files"),
     )
     .unnest("stats")
-    .select("lang who how recall precision num_files".split())
-    .sort("lang who how".split())
-    .filter(pl.col("how").is_in(["raw", "drop_short_and_initial"]))
     .with_columns((2 / (1 / pl.col("recall") + 1 / pl.col("precision"))).alias("F1"))
+    .select("lang who how recall precision F1 num_files".split())
+    .filter(pl.col("how").is_in(["raw", "drop_short", "drop_short_and_initial"]))
+    .sort("lang who how".split())
 )
 pl.Config.set_tbl_rows(100)
 print(metrics)
@@ -234,14 +273,14 @@ All comments based on auscultative examination
 
 | lang   | file                           |   comment  |
 |:-------|:-------------------------------|:-----------|
-| CZ     | 2022101815281542_470.52-480.92 |          One FP by model |
+| CZ     | 2022101815281542_470.52-480.92 |          One FP by model, 2 likely FN by annotator |
 | CZ     | 2022061510181032_206.52-222.18 |          One FP by model, 2 FN by annotator|
 | CZ     | 2022012613181332_256.23-271.19 |          3 FN by annotator |
 | CZ     | 2020030415581612_281.38-288.52 |          3 FN by annotator|
 | PL     | 3sjBHcXY-w8_15353.68-15370.68  |          3:1 phenomenon |
 | CZ     | 2022092715181532_217.04-231.94 |          twice 2:1 phenomenon |
 | CZ     | 2022061415281542_188.70-195.46 |          2 FN by annotator |
-| CZ     | 2022050420082022_565.36-579.73 |          One prominent /aam/ perhaps lexical? One probably FN by annotator|
+| CZ     | 2022050420082022_565.36-579.73 |          One FP: prominent /aam/ perhaps lexical? One probably FN by annotator|
 | CZ     | 2022032918581912_236.43-249.13 |          One probable FP by model, one probable FN by annotator |
 | CZ     | 2022031113281342_335.85-348.25 |          Probable FN by annotator, one short FN by annotator|
 | CZ     | 2020050518181832_677.79-684.86 |          2 consecutive FN by model at the beginning . Raw has them as one filled pause, but we cut it afterwards in post processing|
@@ -255,9 +294,15 @@ Path(snakemake.output[0]).write_text(
     Template(template).render(
         dict(
             when=when,
-            file_count=file_count.to_pandas().to_markdown(index=False),
-            iaa=iaa.to_pandas().to_markdown(index=False),
-            metrics=metrics.to_pandas().to_markdown(index=False),
+            file_count=file_count.sort("file count", descending=True)
+            .to_pandas()
+            .to_markdown(index=False),
+            iaa=iaa.sort("observed_agreement", descending=True)
+            .to_pandas()
+            .to_markdown(index=False),
+            metrics=metrics.sort("F1", descending=True)
+            .to_pandas()
+            .to_markdown(index=False),
             biggest_differences=biggest_differences.to_pandas().to_markdown(
                 index=False
             ),

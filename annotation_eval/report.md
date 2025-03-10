@@ -1,7 +1,7 @@
 
 # Automated evaluation report
 
-Report compiled: 2025-03-07T13:50:29.242174+01:00
+Report compiled: 2025-03-10T10:11:16.577660+01:00
 
 ## Composition of available files:
 
@@ -9,10 +9,10 @@ Simple count of available files per language and per annotator:
 
 | who    | lang   |   file count |
 |:-------|:-------|-------------:|
-| drejc  | CZ     |           58 |
-| peter  | PL     |            2 |
-| urban  | PL     |           11 |
 | nela_1 | CZ     |          400 |
+| drejc  | CZ     |           58 |
+| urban  | PL     |           26 |
+| peter  | PL     |            2 |
 
 ## Inter-annotator agreement
 
@@ -20,23 +20,27 @@ Displayed for all setups where it makes sense (at least two annotators.)
 
 In case of three or more annotators, display pair-wise comparisons.
 
-| lang   | who_1   | who_2   |   observed_agreement |   krippendorff_alpha |   common_files | precision   | recall      |
-|:-------|:--------|:--------|---------------------:|---------------------:|---------------:|:------------|:------------|
-| PL     | urban   | peter   |                1     |             1        |              2 | 1.0 <-> 1.0 | 1.0 <-> 1.0 |
-| CZ     | drejc   | nela_1  |                0.866 |             0.696154 |             58 | 0.9 <-> 0.9 | 0.9 <-> 0.9 |
+| lang   | who_1   | who_2   |   observed_agreement |   krippendorff_alpha |   common_files | precision       | recall          |
+|:-------|:--------|:--------|---------------------:|---------------------:|---------------:|:----------------|:----------------|
+| PL     | peter   | urban   |                1     |             1        |              2 | 1.0 <-> 1.0     | 1.0 <-> 1.0     |
+| CZ     | drejc   | nela_1  |                0.807 |             0.615385 |             58 | 0.818 <-> 0.818 | 0.818 <-> 0.818 |
 
 ## Validation metrics:
 
-| lang   | who    | how                    |   recall |   precision |   num_files |       F1 |
-|:-------|:-------|:-----------------------|---------:|------------:|------------:|---------:|
-| CZ     | drejc  | drop_short_and_initial |    0.914 |       0.86  |          58 | 0.886178 |
-| CZ     | drejc  | raw                    |    0.927 |       0.835 |          58 | 0.878598 |
-| CZ     | nela_1 | drop_short_and_initial |    0.958 |       0.874 |         400 | 0.914074 |
-| CZ     | nela_1 | raw                    |    0.97  |       0.848 |         400 | 0.904906 |
-| PL     | peter  | drop_short_and_initial |    1     |       1     |           2 | 1        |
-| PL     | peter  | raw                    |    1     |       1     |           2 | 1        |
-| PL     | urban  | drop_short_and_initial |    1     |       1     |          11 | 1        |
-| PL     | urban  | raw                    |    1     |       1     |          11 | 1        |
+| lang   | who    | how                    |   recall |   precision |       F1 |   num_files |
+|:-------|:-------|:-----------------------|---------:|------------:|---------:|------------:|
+| PL     | peter  | drop_short             |    1     |       1     | 1        |           2 |
+| PL     | peter  | drop_short_and_initial |    1     |       1     | 1        |           2 |
+| PL     | peter  | raw                    |    1     |       1     | 1        |           2 |
+| PL     | urban  | raw                    |    0.846 |       0.846 | 0.846    |          26 |
+| PL     | urban  | drop_short             |    0.808 |       0.875 | 0.840166 |          26 |
+| PL     | urban  | drop_short_and_initial |    0.808 |       0.875 | 0.840166 |          26 |
+| CZ     | nela_1 | drop_short_and_initial |    0.885 |       0.771 | 0.824076 |         400 |
+| CZ     | nela_1 | drop_short             |    0.899 |       0.758 | 0.822501 |         400 |
+| CZ     | nela_1 | raw                    |    0.903 |       0.732 | 0.808558 |         400 |
+| CZ     | drejc  | drop_short             |    0.864 |       0.745 | 0.800099 |          58 |
+| CZ     | drejc  | drop_short_and_initial |    0.841 |       0.755 | 0.795683 |          58 |
+| CZ     | drejc  | raw                    |    0.864 |       0.717 | 0.783666 |          58 |
 
 ## Inspection of the biggest discrepancies
 
@@ -60,6 +64,10 @@ server at `/cache/peterr/filled_pause_validation/annotation_eval/TG`
 | CZ     | 2020013112281242_124.92-134.81 |          2 |
 | CZ     | 2014032610281042_361.00-377.77 |          2 |
 | CZ     | 2014021119081922_520.16-535.18 |          2 |
+| PL     | 4qjiWelrjAw_34343.22-34354.66  |          1 |
+| PL     | 4qPrqFn-AkU_25808.16-25825.22  |          1 |
+| PL     | 4qPrqFn-AkU_24140.7-24156.46   |          1 |
+| PL     | 4XyiUv_4OdY_17367.3-17377.62   |          1 |
 | CZ     | 2022102517281742_370.56-383.91 |          1 |
 | CZ     | 2022101410481102_258.54-266.73 |          1 |
 | CZ     | 2022101311381152_327.21-340.83 |          1 |
@@ -138,14 +146,14 @@ All comments based on auscultative examination
 
 | lang   | file                           |   comment  |
 |:-------|:-------------------------------|:-----------|
-| CZ     | 2022101815281542_470.52-480.92 |          One FP by model |
+| CZ     | 2022101815281542_470.52-480.92 |          One FP by model, 2 likely FN by annotator |
 | CZ     | 2022061510181032_206.52-222.18 |          One FP by model, 2 FN by annotator|
 | CZ     | 2022012613181332_256.23-271.19 |          3 FN by annotator |
 | CZ     | 2020030415581612_281.38-288.52 |          3 FN by annotator|
 | PL     | 3sjBHcXY-w8_15353.68-15370.68  |          3:1 phenomenon |
 | CZ     | 2022092715181532_217.04-231.94 |          twice 2:1 phenomenon |
 | CZ     | 2022061415281542_188.70-195.46 |          2 FN by annotator |
-| CZ     | 2022050420082022_565.36-579.73 |          One prominent /aam/ perhaps lexical? One probably FN by annotator|
+| CZ     | 2022050420082022_565.36-579.73 |          One FP: prominent /aam/ perhaps lexical? One probably FN by annotator|
 | CZ     | 2022032918581912_236.43-249.13 |          One probable FP by model, one probable FN by annotator |
 | CZ     | 2022031113281342_335.85-348.25 |          Probable FN by annotator, one short FN by annotator|
 | CZ     | 2020050518181832_677.79-684.86 |          2 consecutive FN by model at the beginning . Raw has them as one filled pause, but we cut it afterwards in post processing|

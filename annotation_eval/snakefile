@@ -9,7 +9,7 @@ expected_inferred = map(
 expected_inferred = sorted(list(set(list(expected_inferred))))
 
 
-rule produce_files_df:
+rule find_annotation_files:
     conda: "transformers"
     input: available_anns
     output:
@@ -31,7 +31,7 @@ rule gather_inferred:
 
 rule extract_data_from_files:
     conda: "transformers"
-    input: rules.produce_files_df.output.files_df
+    input: rules.find_annotation_files.output.files_df
     output: "annotations.jsonl"
     script: "scripts/read_anns.py"
 
@@ -44,7 +44,7 @@ rule join_annotations_and_predictions:
     script:
         "scripts/join_annotations_and_predictions.py"
 
-rule prep_single_textgrids:
+rule prep_single_textgrid:
     conda: "transformers"
     input:
         master = rules.join_annotations_and_predictions.output[0]
