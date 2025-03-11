@@ -63,6 +63,9 @@ rule report:
     default_target: True
     conda: "transformers"
     input: rules.join_annotations_and_predictions.output[0], rules.gather_textgrids.output[0]
-    output: "report.md"
+    output:
+        report="report.md",
+        metricsplot="images/metrics.png",
+        genderplot="images/gender.png",
     script: "scripts/report.py"
 

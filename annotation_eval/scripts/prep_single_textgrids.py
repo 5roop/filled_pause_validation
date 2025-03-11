@@ -17,8 +17,17 @@ def find_audio(f: str):
     if len(candidates) == 1:
         return str(candidates[0])
     else:
-        print("Could not find file")
-        raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
+        print("Could not find file, continuing searching by id")
+        candidates = (
+            pl.read_ndjson("../data/*/ParlaSpeech-*.jsonl")
+            .select(["audio", "id"])
+            .filter(pl.col("id").str.contains(f))["audio"]
+        )
+        if len(candidates) == 1:
+            hit = Path(candidates[0]).with_suffix("").name
+            return find_audio(hit)
+        else:
+            raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
 
 
 df = pl.read_ndjson(inpath)

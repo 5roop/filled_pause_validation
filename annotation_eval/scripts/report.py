@@ -1,9 +1,16 @@
 try:
     infile = snakemake.input[0]
+    metrics_plot = snakemake.output.metricsplot
+    gender_plot = snakemake.output.genderplot
 except NameError:
     infile = "master.jsonl"
+    metrics_plot = "images/metrics.png"
+    gender_plot = "images/gender.png"
 
 import polars as pl
+from pathlib import Path
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 df = pl.read_ndjson(infile)
 
@@ -17,7 +24,7 @@ def is_overlapping(this, other):
 
 
 def intervals_to_events(y_trues, y_preds):
-    from sklearn.metrics import accuracy_score, precision_score, recall_score
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
     y_pred_events, y_true_events = [], []
     FPs = []
@@ -41,61 +48,44 @@ def intervals_to_events(y_trues, y_preds):
             y_pred_events.append(0)
             y_true_events.append(0)
             continue
-        for event in y_true:
+        for event in y_pred:
             overlapping = [
-                is_overlapping(event, x) for x in y_pred if x not in inhibited_events
+                is_overlapping(event, x) for x in y_true if x not in inhibited_events
             ]
             if any(overlapping):
                 y_pred_events.append(1)
                 y_true_events.append(1)
-                inhibited_events.extend([x for x in y_pred if is_overlapping(event, x)])
+                inhibited_events.extend([x for x in y_true if is_overlapping(event, x)])
             else:
-                y_pred_events.append(0)
-                y_true_events.append(1)
-        for event in y_pred:
-            if event not in inhibited_events:
                 y_pred_events.append(1)
                 y_true_events.append(0)
-    # for y_pred, y_true in zip(y_preds, y_trues):
-    #     if (y_pred == []) and (y_true == []):
-    #         y_pred_events.append(0)
-    #         y_true_events.append(0)
-    #     for event in y_pred + y_true:
-    #         overlapping = [
-    #             is_overlapping(event, x)
-    #             for x in y_pred + y_true
-    #             if ((x != event) and (x not in inhibited_events))
-    #         ]
-    #         if any(overlapping):
-    #             y_pred_events.append(1)
-    #             y_true_events.append(1)
-    #             TPs.append(event)
-    #             inhibited_events.append(event)
-    #             inhibited_events.extend(overlapping)
-    #         else:
-    #             if event in y_pred:
-    #                 y_pred_events.append(1)
-    #                 y_true_events.append(0)
-    #                 FPs.append(event)
-    #             else:
-    #                 y_true_events.append(1)
-    #                 y_pred_events.append(0)
-    #                 FNs.append(event)
+        for event in y_true:
+            if event not in inhibited_events:
+                y_pred_events.append(0)
+                y_true_events.append(1)
     return {
-        "y_pred": y_pred_events,
         "y_true": y_true_events,
-        "recall": round(recall_score(y_true_events, y_pred_events), 3),
-        "precision": round(precision_score(y_true_events, y_pred_events), 3),
+        "y_pred": y_pred_events,
+        "recall": round(
+            recall_score(y_true_events, y_pred_events, zero_division=1.0), 3
+        ),
+        "precision": round(
+            precision_score(y_true_events, y_pred_events, zero_division=1.0), 3
+        ),
         "accuracy": round(accuracy_score(y_true_events, y_pred_events), 3),
+        "f1": round(f1_score(y_true_events, y_pred_events, zero_division=1.0), 3),
     }
 
 
 y_true = [[[1, 2], [2.2, 2.6], [3, 4]]]
 y_pred = [[[0, 5]]]
 intervals_to_events(y_true, y_pred)
-file_count = df.group_by(["who", "lang"]).agg(
-    pl.col("file").count().alias("file count")
-)
+file_count = df.group_by(
+    [
+        "lang",
+        "who",
+    ]
+).agg(pl.col("file").count().alias("file count"))
 print(
     "File count:",
     file_count,
@@ -190,7 +180,13 @@ molten = df.unpivot(
 )
 
 metrics = (
-    molten.group_by(["lang", "who", "how"])
+    molten.group_by(
+        [
+            "lang",
+            "who",
+            "how",
+        ]
+    )
     .agg(
         pl.map_groups(
             exprs=["y_true", "y_pred"],
@@ -206,11 +202,39 @@ metrics = (
             ["raw", "drop_short", "drop_short_and_initial", "drop_initial"]
         )
     )
-    .sort("lang who how".split())
+    .sort("lang who F1 how".split(), descending=[False, False, True, False])
 )
 pl.Config.set_tbl_rows(100)
 print(metrics)
 
+g = sns.relplot(
+    metrics.unpivot(
+        ["recall", "precision", "F1"],
+        index="lang who how".split(),
+        variable_name="metric",
+        value_name="value",
+    ).sort(
+        pl.col("how").map_elements(
+            lambda h: {
+                "raw": 0,
+                "drop_initial": 1,
+                "drop_short": 2,
+                "drop_short_and_initial": 3,
+            }[h],
+            return_dtype=pl.Int64,
+        )
+    ),
+    x="how",
+    row="metric",
+    style="who",
+    hue="lang",
+    kind="line",
+    y="value",
+    facet_kws={"sharey": False, "sharex": False},
+)
+sns.move_legend(g, "center left", bbox_to_anchor=(1, 0.5))
+plt.tight_layout()
+g.savefig(metrics_plot)
 biggest_differences = (
     df.with_columns(
         (
@@ -223,10 +247,89 @@ biggest_differences = (
     .sort("abs_diff file".split(), descending=True)
     .select("lang file abs_diff".split())
     .unique(subset=["file"], maintain_order=True, keep="first")
-    .filter(pl.col("abs_diff").ge(1))
+    .filter(pl.col("abs_diff").ge(2))
 )
 
 print(biggest_differences)
+
+
+gender = (
+    molten.group_by(["lang", "who", "how", "Speaker_gender"])
+    .agg(
+        pl.map_groups(
+            exprs=["y_true", "y_pred"],
+            function=lambda serieses: intervals_to_events(serieses[0], serieses[1]),
+        ).alias("stats"),
+        pl.col("ann").n_unique().alias("num_files"),
+    )
+    .unnest("stats")
+    .with_columns((2 / (1 / pl.col("recall") + 1 / pl.col("precision"))).alias("F1"))
+    .select("lang who how recall precision F1 Speaker_gender num_files".split())
+    .filter(
+        pl.col("how").is_in(
+            [
+                "raw",
+                "drop_short",
+                "drop_short_and_initial",
+                "drop_initial",
+            ]
+        )
+    )
+    .sort(
+        pl.col("how").map_elements(
+            lambda h: {
+                "raw": 0,
+                "drop_initial": 1,
+                "drop_short": 2,
+                "drop_short_and_initial": 3,
+            }[h],
+            return_dtype=pl.Int64,
+        )
+    )
+)
+
+g = sns.relplot(
+    gender,
+    x="Speaker_gender",
+    y="F1",
+    hue="lang",
+    style="who",
+    row="how",
+    kind="line",
+    facet_kws={"sharey": False, "sharex": False},
+)
+sns.move_legend(g, "center left", bbox_to_anchor=(1, 0.5))
+plt.tight_layout()
+g.savefig(gender_plot)
+
+from scipy.stats import ranksums
+
+overall_gender_stats = df.group_by("Speaker_gender").agg(
+    pl.map_groups(
+        exprs=["y_true", "y_pred_drop_short_and_initial"],
+        function=lambda serieses: intervals_to_events(serieses[0], serieses[1])["f1"],
+    ).alias("F1_score"),
+    pl.map_groups(
+        exprs=["y_true", "y_pred_drop_short_and_initial"],
+        function=lambda serieses: [
+            intervals_to_events(pl.Series("bluu", [t]), pl.Series("bluu", [p]))["f1"]
+            for t, p in zip(serieses[0], serieses[1])
+        ],
+    ).alias("individual_f1s"),
+)
+
+per_language_gender_stats = (
+    df.group_by("lang Speaker_gender".split())
+    .agg(
+        pl.map_groups(
+            exprs=["y_true", "y_pred_drop_short_and_initial"],
+            function=lambda serieses: intervals_to_events(serieses[0], serieses[1])[
+                "f1"
+            ],
+        ).alias("F1_score")
+    )
+    .sort(["lang", "Speaker_gender"])
+)
 
 from datetime import datetime
 
@@ -254,9 +357,29 @@ In case of three or more annotators, display pair-wise comparisons.
 
 {{ iaa }}
 
+## Gender-based analysis:
+The tables show results on `drop_short_and_initial`. For other post-processing methods, check out the plot below.
+
+Overall:
+
+{{ overall_gender_stats }}
+
+Per country:
+
+{{  per_language_gender_stats}}
+
+### A graphical representation of gender disparities for individual languages, annotators, and  postprocessing steps:
+
+![](images/gender.png)
 ## Validation metrics:
 
 {{ metrics }}
+
+### How do post-processing approaches affect the performance?
+
+![plot of postprocessing steps](images/metrics.png)
+
+
 
 ## Inspection of the biggest discrepancies
 
@@ -294,7 +417,7 @@ All comments based on auscultative examination
 """
 
 2 + 2
-Path(snakemake.output[0]).write_text(
+Path(snakemake.output.report).write_text(
     Template(template).render(
         dict(
             when=when,
@@ -304,12 +427,18 @@ Path(snakemake.output[0]).write_text(
             iaa=iaa.sort("observed_agreement", descending=True)
             .to_pandas()
             .to_markdown(index=False),
-            metrics=metrics.sort("lang who F1".split())
-            .to_pandas()
-            .to_markdown(index=False),
+            metrics=metrics.to_pandas().to_markdown(index=False),
             biggest_differences=biggest_differences.to_pandas().to_markdown(
                 index=False
             ),
+            per_language_gender_stats=per_language_gender_stats.to_pandas().to_markdown(
+                index=False
+            ),
+            overall_gender_stats=overall_gender_stats.select(
+                "Speaker_gender F1_score".split()
+            )
+            .to_pandas()
+            .to_markdown(index=False),
         )
     )
 )

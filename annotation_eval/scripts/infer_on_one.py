@@ -7,8 +7,6 @@ import torch
 from datasets import Audio, Dataset
 from transformers import AutoFeatureExtractor, Wav2Vec2BertForAudioFrameClassification
 
-file = snakemake.wildcards["file"]
-
 
 def find_audio(f: str):
     candidates = list(Path("../data/").glob(f"**/{f}.flac")) + list(
@@ -17,10 +15,21 @@ def find_audio(f: str):
     if len(candidates) == 1:
         return str(candidates[0])
     else:
-        print("Could not find file")
-        raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
+        print("Could not find file, continuing searching by id")
+        candidates = (
+            pl.read_ndjson("../data/*/ParlaSpeech-*.jsonl")
+            .select(["audio", "id"])
+            .filter(pl.col("id").str.contains(f))["audio"]
+        )
+        if len(candidates) == 1:
+            hit = Path(candidates[0]).with_suffix("").name
+            return find_audio(hit)
+        else:
+            raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
 
 
+find_audio("ParlaMint-RS_2015-12-28-0.u46167_623-719")
+file = snakemake.wildcards["file"]
 audio = find_audio(file)
 
 df = pl.DataFrame({"file": [file], "audio_path": [audio]})
