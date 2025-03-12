@@ -1,7 +1,7 @@
 
 # Automated evaluation report
 
-Report compiled: 2025-03-11T15:07:30.546444+01:00
+Report compiled: 2025-03-12T08:29:01.211613+01:00
 
 ## Composition of available files:
 
@@ -9,13 +9,13 @@ Simple count of available files per language and per annotator:
 
 | lang   | who    |   file count |
 |:-------|:-------|-------------:|
-| HR     | laura  |          400 |
+| CZ     | drejc  |          400 |
 | CZ     | nela_2 |          400 |
 | CZ     | nela_1 |          400 |
 | RS     | laura  |          400 |
-| CZ     | drejc  |           58 |
-| RS     | lara   |           40 |
+| HR     | laura  |          400 |
 | HR     | lara   |           40 |
+| RS     | lara   |           40 |
 | PL     | urban  |           26 |
 | PL     | peter  |            2 |
 
@@ -28,11 +28,11 @@ In case of three or more annotators, display pair-wise comparisons.
 | lang   | who_1   | who_2   |   observed_agreement |   krippendorff_alpha |   common_files | precision       | recall          |
 |:-------|:--------|:--------|---------------------:|---------------------:|---------------:|:----------------|:----------------|
 | PL     | peter   | urban   |                1     |             1        |              2 | 1.0 <-> 1.0     | 1.0 <-> 1.0     |
-| RS     | lara    | laura   |                0.909 |             0.814103 |             40 | 0.941 <-> 0.842 | 0.842 <-> 0.941 |
+| RS     | laura   | lara    |                0.909 |             0.814103 |             40 | 0.842 <-> 0.941 | 0.941 <-> 0.842 |
 | CZ     | nela_2  | nela_1  |                0.907 |             0.813468 |            400 | 0.871 <-> 0.942 | 0.949 <-> 0.877 |
 | HR     | laura   | lara    |                0.907 |             0.790607 |             40 | 0.872 <-> 1.0   | 1.0 <-> 0.872   |
-| CZ     | nela_2  | drejc   |                0.81  |             0.622415 |             58 | 0.75 <-> 0.868  | 0.892 <-> 0.75  |
-| CZ     | drejc   | nela_1  |                0.807 |             0.615385 |             58 | 0.818 <-> 0.818 | 0.818 <-> 0.818 |
+| CZ     | drejc   | nela_1  |                0.854 |             0.706649 |            400 | 0.928 <-> 0.8   | 0.806 <-> 0.939 |
+| CZ     | drejc   | nela_2  |                0.841 |             0.682    |            400 | 0.95 <-> 0.754  | 0.766 <-> 0.957 |
 
 ## Gender-based analysis:
 The tables show results on `drop_short_and_initial`. For other post-processing methods, check out the plot below.
@@ -41,15 +41,15 @@ Overall:
 
 | Speaker_gender   |   F1_score |
 |:-----------------|-----------:|
-| F                |      0.877 |
-| M                |      0.867 |
+| F                |      0.879 |
+| M                |      0.868 |
 
 Per country:
 
 | lang   | Speaker_gender   |   F1_score |
 |:-------|:-----------------|-----------:|
-| CZ     | F                |      0.835 |
-| CZ     | M                |      0.808 |
+| CZ     | F                |      0.851 |
+| CZ     | M                |      0.829 |
 | HR     | F                |      0.927 |
 | HR     | M                |      0.908 |
 | PL     | F                |      0.88  |
@@ -64,10 +64,10 @@ Per country:
 
 | lang   | who    | how                    |   recall |   precision |       F1 |   num_files |
 |:-------|:-------|:-----------------------|---------:|------------:|---------:|------------:|
-| CZ     | drejc  | drop_short             |    0.864 |       0.745 | 0.800099 |          58 |
-| CZ     | drejc  | drop_short_and_initial |    0.841 |       0.755 | 0.795683 |          58 |
-| CZ     | drejc  | drop_initial           |    0.841 |       0.74  | 0.787274 |          58 |
-| CZ     | drejc  | raw                    |    0.864 |       0.717 | 0.783666 |          58 |
+| CZ     | drejc  | drop_short_and_initial |    0.889 |       0.865 | 0.876836 |         400 |
+| CZ     | drejc  | drop_short             |    0.905 |       0.846 | 0.874506 |         400 |
+| CZ     | drejc  | drop_initial           |    0.889 |       0.846 | 0.866967 |         400 |
+| CZ     | drejc  | raw                    |    0.905 |       0.814 | 0.857091 |         400 |
 | CZ     | nela_1 | drop_short_and_initial |    0.92  |       0.775 | 0.841298 |         400 |
 | CZ     | nela_1 | drop_short             |    0.938 |       0.76  | 0.83967  |         400 |
 | CZ     | nela_1 | drop_initial           |    0.923 |       0.762 | 0.834808 |         400 |
@@ -133,16 +133,20 @@ server at `/cache/peterr/filled_pause_validation/annotation_eval/TG`
 | HR     | ParlaMint-HR_2017-03-17-0.u33746_7661-7771 |          2 |
 | HR     | ParlaMint-HR_2016-06-01-0.u10699_156-395   |          2 |
 | PL     | 3sjBHcXY-w8_15353.68-15370.68              |          2 |
+| CZ     | 2022110117281742_455.23-471.66             |          2 |
 | CZ     | 2022101208580912_507.46-524.34             |          2 |
 | CZ     | 2022092715181532_217.04-231.94             |          2 |
 | CZ     | 2022061415281542_188.70-195.46             |          2 |
 | CZ     | 2022051312581312_622.31-634.12             |          2 |
 | CZ     | 2022050420082022_565.36-579.73             |          2 |
 | CZ     | 2022050311581212_223.57-232.49             |          2 |
+| CZ     | 2022040515581612_99.00-106.29              |          2 |
 | CZ     | 2022032918581912_236.43-249.13             |          2 |
 | CZ     | 2022031113281342_335.85-348.25             |          2 |
+| CZ     | 2020070716481702_470.26-485.06             |          2 |
 | CZ     | 2020060409280942_310.76-329.52             |          2 |
 | CZ     | 2020050518181832_677.79-684.86             |          2 |
+| CZ     | 2020042819081922_295.29-306.82             |          2 |
 | CZ     | 2020013112281242_124.92-134.81             |          2 |
 | CZ     | 2014062009180932_268.02-284.40             |          2 |
 | CZ     | 2014051314581512_102.16-114.72             |          2 |
