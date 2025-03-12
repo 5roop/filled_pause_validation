@@ -1,7 +1,13 @@
-inpath = snakemake.input.master
-lang = snakemake.wildcards["lang"]
-file = snakemake.wildcards["file"]
-
+try:
+    inpath = snakemake.input.master
+    lang = snakemake.wildcards["lang"]
+    file = snakemake.wildcards["file"]
+    wav = snakemake.output.wav
+except:
+    inpath = "master.jsonl"
+    lang = "PL"
+    file = "r-CCvzhAo1M_4298.26-4304.28"
+    wav = "TG/PL/r-CCvzhAo1M_4298.26-4304.28/r-CCvzhAo1M_4298.26-4304.28.wav"
 
 from pathlib import Path
 import polars as pl
@@ -33,7 +39,7 @@ def find_audio(f: str):
 df = pl.read_ndjson(inpath)
 
 subset = df.filter(pl.col("lang").eq(lang) & pl.col("file").eq(file))
-audio_path = Path(snakemake.output.wav)
+audio_path = Path(wav)
 audio_path.parent.mkdir(parents=True, exist_ok=True)
 # if not audio_path.exists():
 audio = AudioSegment.from_file(find_audio(file))
@@ -51,20 +57,20 @@ y_pred_tier = textgrid.IntervalTier(
 )
 y_pred = subset.head(1)["y_pred_drop_short_and_initial"][0]
 for i in y_pred:
-    y_pred_tier.addInterval(textgrid.Interval(i[0], i[1], "eee"))
+    y_pred_tier.addInterval(textgrid.Interval(round(i[0], 3), round(i[1], 3), "eee"))
 tg.append(y_pred_tier)
 y_pred_tier = textgrid.IntervalTier(
     name="y pred drop short", minTime=0, maxTime=audio_len
 )
 y_pred = subset.head(1)["y_pred_drop_short"][0]
 for i in y_pred:
-    y_pred_tier.addInterval(textgrid.Interval(i[0], i[1], "eee"))
+    y_pred_tier.addInterval(textgrid.Interval(round(i[0], 3), round(i[1], 3), "eee"))
 tg.append(y_pred_tier)
 for row in subset.iter_rows(named=True):
     tier = textgrid.IntervalTier(
         name=row["who"].replace("_", " "), minTime=0, maxTime=audio_len
     )
     for i in row["y_true"]:
-        tier.addInterval(textgrid.Interval(i[0], i[1], "eee"))
+        tier.addInterval(textgrid.Interval(round(i[0], 3), round(i[1], 3), "eee"))
     tg.append(tier)
 tg.write(snakemake.output.tg)

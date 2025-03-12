@@ -53,8 +53,8 @@ def intervals_to_events(y_trues, y_preds):
                 is_overlapping(event, x) for x in y_true if x not in inhibited_events
             ]
             if any(overlapping):
-                y_pred_events.append(1)
-                y_true_events.append(1)
+                y_pred_events.extend([1 for i in overlapping])
+                y_true_events.extend([1 for i in overlapping])
                 inhibited_events.extend([x for x in y_true if is_overlapping(event, x)])
             else:
                 y_pred_events.append(1)
@@ -208,12 +208,14 @@ pl.Config.set_tbl_rows(100)
 print(metrics)
 
 g = sns.relplot(
-    metrics.unpivot(
+    metrics.filter(pl.col("who").ne("peter"))
+    .unpivot(
         ["recall", "precision", "F1"],
         index="lang who how".split(),
         variable_name="metric",
         value_name="value",
-    ).sort(
+    )
+    .sort(
         pl.col("how").map_elements(
             lambda h: {
                 "raw": 0,
@@ -226,11 +228,14 @@ g = sns.relplot(
     ),
     x="how",
     row="metric",
-    style="who",
-    hue="lang",
+    hue="who",
+    col="lang",
     kind="line",
     y="value",
-    facet_kws={"sharey": False, "sharex": False},
+    facet_kws={
+        "sharey": True,
+        "sharex": True,
+    },
 )
 sns.move_legend(g, "center left", bbox_to_anchor=(1, 0.5))
 plt.tight_layout()
@@ -296,7 +301,7 @@ g = sns.relplot(
     style="who",
     row="how",
     kind="line",
-    facet_kws={"sharey": False, "sharex": False},
+    facet_kws={"sharey": True, "sharex": True},
 )
 sns.move_legend(g, "center left", bbox_to_anchor=(1, 0.5))
 plt.tight_layout()
