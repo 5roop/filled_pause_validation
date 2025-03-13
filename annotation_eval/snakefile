@@ -72,15 +72,15 @@ rule report:
 rule make_samples:
     conda: "transformers"
     input: rules.report.output.samples
-    output: "eaf_samples_prepared"
+    output: "eaf_samples_prepared", directory(expand("EAF_samples/{what}/", what="HR RS CZ PL SL".split()))
     script: "scripts/make_samples.py"
 
 rule zip:
-    input: directory("EAF_samples/{what}/")
+    input: "EAF_samples/{what}/", "eaf_samples_prepared"
     output: "{what}.zip"
     shell:
         "cd EAF_samples; /home/peterr/mambaforge/envs/transformers/bin/zip -r ../{output}  {wildcards.what}/"
 
 rule gather_samples:
     default_target: True
-    input: expand("{what}.zip", what=["HR", "RS", "CZ", "PL"])
+    input: expand("{what}.zip", what=["HR", "RS", "CZ", "PL", "SL"])

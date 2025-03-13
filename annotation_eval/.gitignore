@@ -1,4 +1,6 @@
 anns
 TG
 y_pred
-tg_prepared
+*_prepared
+EAF_samples
+*.zip

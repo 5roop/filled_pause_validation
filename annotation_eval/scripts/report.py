@@ -459,7 +459,7 @@ Path(snakemake.output.report).write_text(
 
 
 candidates = (
-    df.filter(pl.col("who").is_in(["laura", "drejc", "urban"]))
+    df.filter(pl.col("who").is_in(["laura", "drejc", "urban", "gold"]))
     .rename({"y_pred_drop_short_and_initial": "y_pred"})
     .select("lang file y_true y_pred".split())
     .with_columns(

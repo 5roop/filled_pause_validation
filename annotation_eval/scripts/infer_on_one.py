@@ -9,8 +9,10 @@ from transformers import AutoFeatureExtractor, Wav2Vec2BertForAudioFrameClassifi
 
 
 def find_audio(f: str):
-    candidates = list(Path("../data/").glob(f"**/{f}.flac")) + list(
-        Path("../data/").glob(f"**/{f}.mp3")
+    candidates = (
+        list(Path("../data/").glob(f"**/{f}.flac"))
+        + list(Path("../data/").glob(f"**/{f}.mp3"))
+        + list(Path("../data/").glob(f"**/{f}.wav"))
     )
     if len(candidates) == 1:
         return str(candidates[0])
@@ -28,7 +30,7 @@ def find_audio(f: str):
             raise FileNotFoundError(f"Expected 1 file, found {len(candidates)}")
 
 
-find_audio("ParlaMint-RS_2015-12-28-0.u46167_623-719")
+# find_audio("ParlaMint-RS_2015-12-28-0.u46167_623-719")
 file = snakemake.wildcards["file"]
 audio = find_audio(file)
 
@@ -77,7 +79,7 @@ def frames_to_intervals(
             results.append(
                 (
                     round(ndf.loc[si, "time_s"], 3),
-                    round(ndf.loc[ei - 1, "time_s"], 3),
+                    round(ndf.loc[ei, "time_s"], 3),
                 )
             )
     if drop_short and (len(results) > 0):
