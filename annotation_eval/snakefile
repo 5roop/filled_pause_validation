@@ -60,12 +60,27 @@ rule gather_textgrids:
 
 
 rule report:
-    default_target: True
     conda: "transformers"
     input: rules.join_annotations_and_predictions.output[0], rules.gather_textgrids.output[0]
     output:
         report="report.md",
         metricsplot="images/metrics.png",
         genderplot="images/gender.png",
+        samples="samples.jsonl",
     script: "scripts/report.py"
 
+rule make_samples:
+    conda: "transformers"
+    input: rules.report.output.samples
+    output: "eaf_samples_prepared"
+    script: "scripts/make_samples.py"
+
+rule zip:
+    input: directory("EAF_samples/{what}/")
+    output: "{what}.zip"
+    shell:
+        "cd EAF_samples; /home/peterr/mambaforge/envs/transformers/bin/zip -r ../{output}  {wildcards.what}/"
+
+rule gather_samples:
+    default_target: True
+    input: expand("{what}.zip", what=["HR", "RS", "CZ", "PL"])

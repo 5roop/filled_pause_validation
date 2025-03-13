@@ -1,7 +1,7 @@
 
 # Automated evaluation report
 
-Report compiled: 2025-03-12T14:17:38.415453+01:00
+Report compiled: 2025-03-12T17:57:11.448219+01:00
 
 ## Composition of available files:
 
@@ -9,14 +9,14 @@ Simple count of available files per language and per annotator:
 
 | lang   | who    |   file count |
 |:-------|:-------|-------------:|
+| RS     | laura  |          400 |
 | CZ     | nela_1 |          400 |
+| CZ     | nela_2 |          400 |
 | CZ     | drejc  |          400 |
 | HR     | laura  |          400 |
-| CZ     | nela_2 |          400 |
-| RS     | laura  |          400 |
 | PL     | urban  |          400 |
-| HR     | lara   |           40 |
 | RS     | lara   |           40 |
+| HR     | lara   |           40 |
 | PL     | peter  |            2 |
 
 ## Inter-annotator agreement
@@ -28,11 +28,11 @@ In case of three or more annotators, display pair-wise comparisons.
 | lang   | who_1   | who_2   |   observed_agreement |   krippendorff_alpha |   common_files | precision       | recall          |
 |:-------|:--------|:--------|---------------------:|---------------------:|---------------:|:----------------|:----------------|
 | PL     | urban   | peter   |                1     |             1        |              2 | 1.0 <-> 1.0     | 1.0 <-> 1.0     |
-| CZ     | nela_1  | nela_2  |                0.932 |             0.852693 |            400 | 0.967 <-> 0.92  | 0.928 <-> 0.969 |
-| HR     | lara    | laura   |                0.931 |             0.812582 |             40 | 1.0 <-> 0.909   | 0.912 <-> 1.0   |
-| RS     | lara    | laura   |                0.915 |             0.82967  |             40 | 0.95 <-> 0.864  | 0.864 <-> 0.95  |
-| CZ     | nela_1  | drejc   |                0.893 |             0.761831 |            400 | 0.876 <-> 0.963 | 0.964 <-> 0.892 |
-| CZ     | drejc   | nela_2  |                0.891 |             0.753233 |            400 | 0.975 <-> 0.839 | 0.87 <-> 0.974  |
+| RS     | laura   | lara    |                0.909 |             0.814103 |             40 | 0.842 <-> 0.941 | 0.941 <-> 0.842 |
+| CZ     | nela_1  | nela_2  |                0.907 |             0.813811 |            400 | 0.942 <-> 0.871 | 0.877 <-> 0.949 |
+| HR     | laura   | lara    |                0.907 |             0.790607 |             40 | 0.872 <-> 1.0   | 1.0 <-> 0.872   |
+| CZ     | nela_1  | drejc   |                0.854 |             0.707559 |            400 | 0.8 <-> 0.928   | 0.939 <-> 0.806 |
+| CZ     | drejc   | nela_2  |                0.841 |             0.682    |            400 | 0.95 <-> 0.754  | 0.766 <-> 0.957 |
 
 ## Gender-based analysis:
 The tables show results on `drop_short_and_initial`. For other post-processing methods, check out the plot below.
@@ -41,21 +41,21 @@ Overall:
 
 | Speaker_gender   |   F1_score |
 |:-----------------|-----------:|
-| M                |      0.929 |
-| F                |      0.938 |
+| F                |      0.89  |
+| M                |      0.877 |
 
 Per country:
 
 | lang   | Speaker_gender   |   F1_score |
 |:-------|:-----------------|-----------:|
-| CZ     | F                |      0.91  |
-| CZ     | M                |      0.9   |
-| HR     | F                |      0.957 |
-| HR     | M                |      0.93  |
-| PL     | F                |      0.97  |
-| PL     | M                |      0.961 |
-| RS     | F                |      0.949 |
-| RS     | M                |      0.969 |
+| CZ     | F                |      0.851 |
+| CZ     | M                |      0.829 |
+| HR     | F                |      0.927 |
+| HR     | M                |      0.908 |
+| PL     | F                |      0.935 |
+| PL     | M                |      0.913 |
+| RS     | F                |      0.917 |
+| RS     | M                |      0.956 |
 
 ### A graphical representation of gender disparities for individual languages, annotators, and  postprocessing steps:
 
@@ -64,42 +64,42 @@ Per country:
 
 | lang   | who    | how                    |   recall |   precision |       F1 |   num_files |
 |:-------|:-------|:-----------------------|---------:|------------:|---------:|------------:|
-| CZ     | drejc  | drop_short_and_initial |    0.939 |       0.925 | 0.931947 |         400 |
-| CZ     | drejc  | drop_short             |    0.948 |       0.913 | 0.930171 |         400 |
-| CZ     | drejc  | drop_initial           |    0.939 |       0.914 | 0.926331 |         400 |
-| CZ     | drejc  | raw                    |    0.948 |       0.894 | 0.920208 |         400 |
-| CZ     | nela_1 | drop_short_and_initial |    0.953 |       0.86  | 0.904115 |         400 |
-| CZ     | nela_1 | drop_short             |    0.964 |       0.849 | 0.902853 |         400 |
-| CZ     | nela_1 | drop_initial           |    0.956 |       0.851 | 0.900449 |         400 |
-| CZ     | nela_1 | raw                    |    0.966 |       0.831 | 0.893429 |         400 |
-| CZ     | nela_2 | drop_short_and_initial |    0.96  |       0.826 | 0.887973 |         400 |
-| CZ     | nela_2 | drop_short             |    0.972 |       0.815 | 0.886603 |         400 |
-| CZ     | nela_2 | drop_initial           |    0.96  |       0.814 | 0.880992 |         400 |
-| CZ     | nela_2 | raw                    |    0.972 |       0.795 | 0.874635 |         400 |
-| HR     | lara   | drop_initial           |    0.929 |       1     | 0.963193 |          40 |
-| HR     | lara   | drop_short             |    0.929 |       1     | 0.963193 |          40 |
-| HR     | lara   | drop_short_and_initial |    0.929 |       1     | 0.963193 |          40 |
-| HR     | lara   | raw                    |    0.929 |       1     | 0.963193 |          40 |
-| HR     | laura  | drop_short             |    0.961 |       0.927 | 0.943694 |         400 |
-| HR     | laura  | drop_short_and_initial |    0.961 |       0.927 | 0.943694 |         400 |
-| HR     | laura  | drop_initial           |    0.961 |       0.916 | 0.937961 |         400 |
-| HR     | laura  | raw                    |    0.961 |       0.914 | 0.936911 |         400 |
+| CZ     | drejc  | drop_short_and_initial |    0.889 |       0.865 | 0.876836 |         400 |
+| CZ     | drejc  | drop_short             |    0.905 |       0.846 | 0.874506 |         400 |
+| CZ     | drejc  | drop_initial           |    0.889 |       0.846 | 0.866967 |         400 |
+| CZ     | drejc  | raw                    |    0.905 |       0.814 | 0.857091 |         400 |
+| CZ     | nela_1 | drop_short_and_initial |    0.92  |       0.775 | 0.841298 |         400 |
+| CZ     | nela_1 | drop_short             |    0.938 |       0.76  | 0.83967  |         400 |
+| CZ     | nela_1 | drop_initial           |    0.923 |       0.762 | 0.834808 |         400 |
+| CZ     | nela_1 | raw                    |    0.941 |       0.734 | 0.824709 |         400 |
+| CZ     | nela_2 | drop_short_and_initial |    0.934 |       0.735 | 0.822636 |         400 |
+| CZ     | nela_2 | drop_short             |    0.953 |       0.721 | 0.820924 |         400 |
+| CZ     | nela_2 | drop_initial           |    0.934 |       0.72  | 0.813156 |         400 |
+| CZ     | nela_2 | raw                    |    0.953 |       0.694 | 0.803135 |         400 |
+| HR     | lara   | drop_initial           |    0.895 |       1     | 0.944591 |          40 |
+| HR     | lara   | drop_short             |    0.895 |       1     | 0.944591 |          40 |
+| HR     | lara   | drop_short_and_initial |    0.895 |       1     | 0.944591 |          40 |
+| HR     | lara   | raw                    |    0.895 |       1     | 0.944591 |          40 |
+| HR     | laura  | drop_short             |    0.94  |       0.89  | 0.914317 |         400 |
+| HR     | laura  | drop_short_and_initial |    0.94  |       0.89  | 0.914317 |         400 |
+| HR     | laura  | drop_initial           |    0.94  |       0.875 | 0.906336 |         400 |
+| HR     | laura  | raw                    |    0.94  |       0.872 | 0.904724 |         400 |
 | PL     | peter  | drop_initial           |    1     |       1     | 1        |           2 |
 | PL     | peter  | drop_short             |    1     |       1     | 1        |           2 |
 | PL     | peter  | drop_short_and_initial |    1     |       1     | 1        |           2 |
 | PL     | peter  | raw                    |    1     |       1     | 1        |           2 |
-| PL     | urban  | drop_short             |    0.955 |       0.976 | 0.965386 |         400 |
-| PL     | urban  | drop_short_and_initial |    0.954 |       0.976 | 0.964875 |         400 |
-| PL     | urban  | raw                    |    0.959 |       0.965 | 0.961991 |         400 |
-| PL     | urban  | drop_initial           |    0.958 |       0.965 | 0.961487 |         400 |
-| RS     | lara   | drop_initial           |    0.913 |       0.913 | 0.913    |          40 |
-| RS     | lara   | drop_short             |    0.913 |       0.913 | 0.913    |          40 |
-| RS     | lara   | drop_short_and_initial |    0.913 |       0.913 | 0.913    |          40 |
-| RS     | lara   | raw                    |    0.913 |       0.913 | 0.913    |          40 |
-| RS     | laura  | drop_short             |    0.974 |       0.947 | 0.96031  |         400 |
-| RS     | laura  | drop_short_and_initial |    0.974 |       0.947 | 0.96031  |         400 |
-| RS     | laura  | drop_initial           |    0.983 |       0.935 | 0.958399 |         400 |
-| RS     | laura  | raw                    |    0.983 |       0.935 | 0.958399 |         400 |
+| PL     | urban  | drop_short             |    0.903 |       0.947 | 0.924477 |         400 |
+| PL     | urban  | drop_short_and_initial |    0.901 |       0.947 | 0.923427 |         400 |
+| PL     | urban  | raw                    |    0.91  |       0.924 | 0.916947 |         400 |
+| PL     | urban  | drop_initial           |    0.908 |       0.924 | 0.91593  |         400 |
+| RS     | lara   | drop_initial           |    0.895 |       0.895 | 0.895    |          40 |
+| RS     | lara   | drop_short             |    0.895 |       0.895 | 0.895    |          40 |
+| RS     | lara   | drop_short_and_initial |    0.895 |       0.895 | 0.895    |          40 |
+| RS     | lara   | raw                    |    0.895 |       0.895 | 0.895    |          40 |
+| RS     | laura  | drop_short             |    0.959 |       0.918 | 0.938052 |         400 |
+| RS     | laura  | drop_short_and_initial |    0.959 |       0.918 | 0.938052 |         400 |
+| RS     | laura  | drop_initial           |    0.974 |       0.9   | 0.935539 |         400 |
+| RS     | laura  | raw                    |    0.974 |       0.9   | 0.935539 |         400 |
 
 ### How do post-processing approaches affect the performance?
 

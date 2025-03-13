@@ -2,10 +2,12 @@ try:
     infile = snakemake.input[0]
     metrics_plot = snakemake.output.metricsplot
     gender_plot = snakemake.output.genderplot
+    samples = snakemake.output.samples
 except NameError:
     infile = "master.jsonl"
     metrics_plot = "images/metrics.png"
     gender_plot = "images/gender.png"
+    samples = "brisi.jsonl"
 
 import polars as pl
 from pathlib import Path
@@ -27,9 +29,9 @@ def intervals_to_events(y_trues, y_preds):
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
     y_pred_events, y_true_events = [], []
-    FPs = []
-    FNs = []
-    TPs = []
+    FPs = 0
+    FNs = 0
+    TPs = 0
     try:
         y_preds, y_trues = y_preds.to_list(), y_trues.to_list()
     except:
@@ -53,16 +55,20 @@ def intervals_to_events(y_trues, y_preds):
                 is_overlapping(event, x) for x in y_true if x not in inhibited_events
             ]
             if any(overlapping):
-                y_pred_events.extend([1 for i in overlapping])
-                y_true_events.extend([1 for i in overlapping])
+                y_pred_events.extend([1 for i in overlapping[:1]])
+                y_true_events.extend([1 for i in overlapping[:1]])
                 inhibited_events.extend([x for x in y_true if is_overlapping(event, x)])
+                TPs += 1
             else:
                 y_pred_events.append(1)
                 y_true_events.append(0)
+                FPs += 1
+
         for event in y_true:
             if event not in inhibited_events:
                 y_pred_events.append(0)
                 y_true_events.append(1)
+                FNs += 1
     return {
         "y_true": y_true_events,
         "y_pred": y_pred_events,
@@ -74,6 +80,9 @@ def intervals_to_events(y_trues, y_preds):
         ),
         "accuracy": round(accuracy_score(y_true_events, y_pred_events), 3),
         "f1": round(f1_score(y_true_events, y_pred_events, zero_division=1.0), 3),
+        "FP": FPs,
+        "FN": FNs,
+        "TP": TPs,
     }
 
 
@@ -447,3 +456,33 @@ Path(snakemake.output.report).write_text(
         )
     )
 )
+
+
+candidates = (
+    df.filter(pl.col("who").is_in(["laura", "drejc", "urban"]))
+    .rename({"y_pred_drop_short_and_initial": "y_pred"})
+    .select("lang file y_true y_pred".split())
+    .with_columns(
+        pl.struct(["y_true", "y_pred"])
+        .map_elements(
+            lambda row: intervals_to_events([row["y_true"]], [row["y_pred"]])["FP"],
+            return_dtype=pl.UInt64,
+        )
+        .alias("FP"),
+        pl.struct(["y_true", "y_pred"])
+        .map_elements(
+            lambda row: intervals_to_events([row["y_true"]], [row["y_pred"]])["FN"],
+            return_dtype=pl.UInt64,
+        )
+        .alias("FN"),
+    )
+    .filter(pl.col("FN").ne(0) | pl.col("FP").ne(0))
+    .sort(["lang", "file"])
+)
+selection = (
+    candidates.group_by("lang").agg(pl.col("file").sample(20)).explode("file")["file"]
+)
+
+final = candidates.filter(pl.col("file").is_in(selection))
+
+final.write_ndjson(samples)

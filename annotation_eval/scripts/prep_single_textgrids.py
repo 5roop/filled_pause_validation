@@ -17,8 +17,10 @@ from tqdm import tqdm
 
 
 def find_audio(f: str):
-    candidates = list(Path("../data/").glob(f"**/{f}.flac")) + list(
-        Path("../data/").glob(f"**/{f}.mp3")
+    candidates = (
+        list(Path("../data/").glob(f"**/{f}.flac"))
+        + list(Path("../data/").glob(f"**/{f}.mp3"))
+        + list(Path("../data/").glob(f"**/{f}.wav"))
     )
     if len(candidates) == 1:
         return str(candidates[0])
